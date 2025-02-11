@@ -15,9 +15,9 @@ from ncatbot.gateway import Websocket
 from ncatbot.http import check_websocket
 from ncatbot.logger import get_log
 from ncatbot.message import GroupMessage, PrivateMessage
+from ncatbot.plugins_sys import Event, PluginLoader
 from ncatbot.utils.literals import INSTALL_CHECK_PATH, NAPCAT_DIR
 
-from ncatbot.plugins_sys import PluginLoader, Event
 _log = get_log("ncatbot")
 
 
@@ -36,41 +36,6 @@ class BotClient:
         self._request_event_handler = None
         self.plugins_path = plugins_path
         self.plugin_sys = PluginLoader()
-
-    def group_event(self, types=None):
-        def decorator(func):
-            self._group_event_handler = (func, types)
-            return func
-
-        return decorator
-
-    def private_event(self, types=None):
-        def decorator(func):
-            self._private_event_handler = (func, types)
-            return func
-
-        return decorator
-
-    def notice_event(self, func):
-        self._notice_event_handler = func
-        return func
-
-    def request_event(self, func):
-        self._request_event_handler = func
-        return func
-
-    def __init__(self, use_ws=True):
-        if not config._updated:
-            _log.warning("没有主动设置配置项, 配置项将使用默认值")
-            time.sleep(0.8)
-        _log.info(config)
-        time.sleep(1.6)
-
-        self.api = BotAPI(use_ws)
-        self._group_event_handlers = []
-        self._private_event_handlers = []
-        self._notice_event_handlers = []
-        self._request_event_handlers = []
 
     async def handle_group_event(self, msg: dict):
         for handler, types in self._group_event_handlers:
@@ -98,12 +63,14 @@ class BotClient:
         def decorator(func):
             self._group_event_handlers.append((func, types))
             return func
+
         return decorator
 
     def private_event(self, types=None):
         def decorator(func):
             self._private_event_handlers.append((func, types))
             return func
+
         return decorator
 
     def notice_event(self, func):
