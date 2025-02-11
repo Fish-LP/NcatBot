@@ -30,10 +30,10 @@ class BotClient:
         time.sleep(1.6)
 
         self.api = BotAPI(use_ws)
-        self._group_event_handler = None
-        self._private_event_handler = None
-        self._notice_event_handler = None
-        self._request_event_handler = None
+        self._group_event_handlers = None
+        self._private_event_handlers = None
+        self._notice_event_handlers = None
+        self._request_event_handlers = None
         self.plugins_path = plugins_path
         self.plugin_sys = PluginLoader()
 
