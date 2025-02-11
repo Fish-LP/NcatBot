@@ -35,6 +35,7 @@ class BotClient:
         self._notice_event_handler = None
         self._request_event_handler = None
         self.plugins_path = plugins_path
+        self.plugin_sys = PluginLoader()
 
     def group_event(self, types=None):
         def decorator(func):
@@ -76,14 +77,14 @@ class BotClient:
             if types is None or any(i["type"] in types for i in msg["message"]):
                 msg = GroupMessage(msg)
                 await handler(msg)
-                await self.plugin_sys.event_bus.publish_async(Event("ncatbot.group", msg))
+                self.plugin_sys.event_bus.publish_async(Event("ncatbot.group", msg))
 
     async def handle_private_event(self, msg: dict):
         for handler, types in self._private_event_handlers:
             if types is None or any(i["type"] in types for i in msg["message"]):
                 msg = PrivateMessage(msg)
                 await handler(msg)
-                await self.plugin_sys.event_bus.publish_async(Event("ncatbot.private", msg))
+                self.plugin_sys.event_bus.publish_async(Event("ncatbot.private", msg))
 
     async def handle_notice_event(self, msg: dict):
         for handler in self._notice_event_handlers:
@@ -115,7 +116,7 @@ class BotClient:
 
     async def run_async(self):
         websocket_server = Websocket(self)
-        await self.plugin_sys.load_plugin(self.plugins_path, self.api)
+        await self.plugin_sys.load_plugin(self.plugins_path)
         await websocket_server.ws_connect()
 
     def run(self, reload=False):
